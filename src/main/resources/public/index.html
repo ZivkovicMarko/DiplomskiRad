@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- tandard karaktera -->
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" title="no title" charset="utf-8">
+    <!--style media="screen">
+        body {
+            background-image: url("images/bg-image1.jpg");
+            background-color: #cccccc;
+        }
+    </style -->
+</head>
+
+<body onload="getLocation()">
+
+    <h2 class="bg-primary">Aplikacija ParkingAdvisor</h2>
+<!-- zona je slika -->
+    <p id="zona"></p>
+
+
+    <div id="mapholder"></div>
+
+    <script>
+        var x = document.getElementById("zona");
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition, showError);
+            } else {
+                x.innerHTML = "Ovaj brauzer ne podrzava Geolokaciju.";
+            }
+        }
+
+        function showPosition(position) {
+            var lat = position.coords.latitude;
+            var lon = position.coords.longitude;
+            var radius = 15.00;
+
+            var latlon = lat + "," + lon;
+
+            var bojazoneUrl = "/boja/" + lat + "/" + lon + "/" + radius;
+            var bojazone = "white";
+
+            var mapaUrl = "https://maps.googleapis.com/maps/api/staticmap?center=" +
+                latlon + "&zoom=18&size=400x300&format=png&sensor=false&markers=color:" + bojazone + "%7Clabel:X%7C" + latlon + "&maptype=hybrid&key=AIzaSyBkGDb-PqRy-3hzcrzlw1IxWoQJiw-3eWQ";
+            document.getElementById("mapholder").innerHTML = "<img src='" + mapaUrl + "'>";
+
+            var xhtmlRequestBoja = new XMLHttpRequest();
+
+            xhtmlRequestBoja.onreadystatechange = function() {
+                if (xhtmlRequestBoja.readyState == 4 && xhtmlRequestBoja.status == 200) {
+                    bojazone = xhtmlRequestBoja.responseText;
+                    document.getElementById("zona").innerHTML = "<img src='/images/" + bojazone + ".png'>";
+                }
+            }
+            console.log(bojazoneUrl);
+            xhtmlRequestBoja.open("GET", bojazoneUrl);
+            xhtmlRequestBoja.send();
+
+
+        }
+
+        function showError(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    x.innerHTML = "User denied the request for Geolocation."
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    x.innerHTML = "Location information is unavailable."
+                    break;
+                case error.TIMEOUT:
+                    x.innerHTML = "The request to get user location timed out."
+                    break;
+                case error.UNKNOWN_ERROR:
+                    x.innerHTML = "An unknown error occurred."
+                    break;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
